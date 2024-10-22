@@ -94,7 +94,6 @@ import Link from '@/components/Link'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
 import { formatDate } from 'pliny/utils/formatDate'
-import NewsletterForm from 'pliny/ui/NewsletterForm'
 
 const MAX_DISPLAY = 5
 
@@ -143,11 +142,6 @@ export default function Home({ posts }) {
           <Link href="/blog" className="text-primary-500 hover:underline" aria-label="All posts">
             All Posts &rarr;
           </Link>
-        </div>
-      )}
-      {siteMetadata.newsletter?.provider && (
-        <div className="flex justify-center pt-6">
-          <NewsletterForm />
         </div>
       )}
     </>
