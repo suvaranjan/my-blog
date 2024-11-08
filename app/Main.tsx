@@ -1,149 +1,116 @@
-// import Link from '@/components/Link'
-// import Tag from '@/components/Tag'
-// import siteMetadata from '@/data/siteMetadata'
-// import { formatDate } from 'pliny/utils/formatDate'
-// import NewsletterForm from 'pliny/ui/NewsletterForm'
+'use client'
 
-// const MAX_DISPLAY = 5
+import { useEffect, useRef } from 'react'
 
-// export default function Home({ posts }) {
-//   return (
-//     <>
-//       <div className="divide-y divide-gray-200 dark:divide-gray-700">
-//         <div className="space-y-2 pb-8 pt-6 md:space-y-5">
-//           <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
-//             Latest
-//           </h1>
-//           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
-//             {siteMetadata.description}
-//           </p>
-//         </div>
-//         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-//           {!posts.length && 'No posts found.'}
-//           {posts.slice(0, MAX_DISPLAY).map((post) => {
-//             const { slug, date, title, summary, tags } = post
-//             return (
-//               <li key={slug} className="py-12">
-//                 <article>
-//                   <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
-//                     <dl>
-//                       <dt className="sr-only">Published on</dt>
-//                       <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-//                         <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
-//                       </dd>
-//                     </dl>
-//                     <div className="space-y-5 xl:col-span-3">
-//                       <div className="space-y-6">
-//                         <div>
-//                           <h2 className="text-2xl font-bold leading-8 tracking-tight">
-//                             <Link
-//                               href={`/blog/${slug}`}
-//                               className="text-gray-900 dark:text-gray-100"
-//                             >
-//                               {title}
-//                             </Link>
-//                           </h2>
-//                           <div className="flex flex-wrap">
-//                             {tags.map((tag) => (
-//                               <Tag key={tag} text={tag} />
-//                             ))}
-//                           </div>
-//                         </div>
-//                         <div className="prose max-w-none text-gray-500 dark:text-gray-400">
-//                           {summary}
-//                         </div>
-//                       </div>
-//                       <div className="text-base font-medium leading-6">
-//                         <Link
-//                           href={`/blog/${slug}`}
-//                           className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-//                           aria-label={`Read more: "${title}"`}
-//                         >
-//                           Read more &rarr;
-//                         </Link>
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </article>
-//               </li>
-//             )
-//           })}
-//         </ul>
-//       </div>
-//       {posts.length > MAX_DISPLAY && (
-//         <div className="flex justify-end text-base font-medium leading-6">
-//           <Link
-//             href="/blog"
-//             className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-//             aria-label="All posts"
-//           >
-//             All Posts &rarr;
-//           </Link>
-//         </div>
-//       )}
-//       {siteMetadata.newsletter?.provider && (
-//         <div className="flex items-center justify-center pt-4">
-//           <NewsletterForm />
-//         </div>
-//       )}
-//     </>
-//   )
-// }
+export default function HeroSection() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
-import Link from '@/components/Link'
-import Tag from '@/components/Tag'
-import siteMetadata from '@/data/siteMetadata'
-import { formatDate } from 'pliny/utils/formatDate'
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-const MAX_DISPLAY = 5
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
-export default function Home({ posts }) {
+    let animationFrameId: number
+
+    // Resize the canvas when the window size changes
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+    }
+
+    window.addEventListener('resize', resizeCanvas)
+    resizeCanvas()
+
+    // Array to store particles
+    const particles: Array<{
+      x: number
+      y: number
+      radius: number
+      opacity: number
+      speedX: number
+      speedY: number
+      color: string
+    }> = []
+
+    // Generate particles
+    const createParticle = () => {
+      const particle = {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 3 + 1, // radius between 1 and 4
+        opacity: Math.random() * 0.5 + 0.5, // opacity between 0.5 and 1
+        speedX: Math.random() * 0.5 - 0.25, // speed in X direction
+        speedY: Math.random() * 0.5 - 0.25, // speed in Y direction
+        color: `hsl(${Math.random() * 360}, 100%, 70%)`, // random color
+      }
+      particles.push(particle)
+    }
+
+    // Function to update and draw particles
+    const drawParticles = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Draw each particle
+      particles.forEach((particle, index) => {
+        ctx.beginPath()
+        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
+        ctx.fillStyle = particle.color
+        ctx.globalAlpha = particle.opacity
+        ctx.fill()
+
+        // Update particle properties
+        particle.x += particle.speedX
+        particle.y += particle.speedY
+
+        // Create a fading effect for particles
+        particle.opacity -= 0.002
+        particle.radius *= 0.99
+
+        // Remove particles that are no longer visible
+        if (particle.opacity <= 0 || particle.radius <= 0.1) {
+          particles.splice(index, 1)
+        }
+
+        // Loop particle to the other side when it goes off the screen
+        if (particle.x < 0) particle.x = canvas.width
+        if (particle.x > canvas.width) particle.x = 0
+        if (particle.y < 0) particle.y = canvas.height
+        if (particle.y > canvas.height) particle.y = 0
+      })
+
+      // Create new particles every frame to fill the background
+      if (particles.length < 200) createParticle()
+
+      animationFrameId = requestAnimationFrame(drawParticles)
+    }
+
+    drawParticles()
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas)
+      cancelAnimationFrame(animationFrameId)
+    }
+  }, [])
+
   return (
-    <>
-      <div className="divide-y divide-gray-100 dark:divide-gray-800">
-        <div className="space-y-2 pb-8 pt-6">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Latest</h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{siteMetadata.description}</p>
-        </div>
-        <ul className="divide-y divide-gray-100 dark:divide-gray-800">
-          {!posts.length && 'No posts found.'}
-          {posts.slice(0, MAX_DISPLAY).map((post) => {
-            const { slug, date, title, summary, tags } = post
-            return (
-              <li key={slug} className="py-8">
-                <article>
-                  <div className="space-y-4 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
-                    <dl className="xl:col-span-1">
-                      <dt className="sr-only">Published on</dt>
-                      <dd className="text-xs text-gray-500 dark:text-gray-400">
-                        <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
-                      </dd>
-                    </dl>
-                    <div className="space-y-2 xl:col-span-3">
-                      <h2 className="text-xl font-medium text-gray-800 dark:text-gray-100">
-                        <Link href={`/blog/${slug}`}>{title}</Link>
-                      </h2>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{summary}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {tags.map((tag) => (
-                          <Tag key={tag} text={tag} />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              </li>
-            )
-          })}
-        </ul>
-      </div>
-      {posts.length > MAX_DISPLAY && (
-        <div className="flex justify-end pt-4">
-          <Link href="/blog" className="text-primary-500 hover:underline" aria-label="All posts">
-            All Posts &rarr;
-          </Link>
-        </div>
-      )}
-    </>
+    <div className="relative min-h-screen bg-gray-50 dark:bg-gray-950">
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 h-full w-full"
+        style={{ pointerEvents: 'none' }}
+      />
+
+      <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 text-center">
+        <h1 className="mb-6 text-5xl font-bold text-gray-800 dark:text-white md:text-6xl">
+          Full Stack Developer
+        </h1>
+        <p className="mb-8 max-w-2xl text-xl text-gray-600 dark:text-gray-400 md:text-2xl">
+          Crafting elegant solutions with cutting-edge technologies. Turning ideas into reality, one
+          line of code at a time.
+        </p>
+      </main>
+    </div>
   )
 }
